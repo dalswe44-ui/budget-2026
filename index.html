@@ -5,437 +5,415 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2026 가계부 달력</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-  :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --surface2: #f0ede8;
-    --border: rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.14);
-    --text: #1a1a1a;
-    --text2: #6b6860;
-    --text3: #aaa8a0;
-    --rent: #e8722a;
-    --rent-bg: #fff3ec;
-    --util: #2d7dd2;
-    --util-bg: #eaf2fb;
-    --food: #d4a017;
-    --food-bg: #fdf6e3;
-    --misc: #7c6fcd;
-    --misc-bg: #f0eeff;
-    --move: #e05252;
-    --move-bg: #fef0f0;
-    --other: #5a8a5a;
-    --other-bg: #eef6ee;
-    --today: #1a1a1a;
-    --accent: #e8722a;
-    --radius: 10px;
-    --shadow: 0 1px 4px rgba(0,0,0,0.07);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  .container { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+:root {
+  --bg:#f7f6f3;--surface:#fff;--surface2:#f0ede8;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1a1a;--text2:#6b6860;--text3:#aaa8a0;
+  --rent:#e8722a;--rent-bg:#fff3ec;
+  --util:#2d7dd2;--util-bg:#eaf2fb;
+  --food:#d4a017;--food-bg:#fdf6e3;
+  --misc:#7c6fcd;--misc-bg:#f0eeff;
+  --move:#e05252;--move-bg:#fef0f0;
+  --other:#5a8a5a;--other-bg:#eef6ee;
+  --accent:#e8722a;--radius:10px;
+  --shadow:0 1px 4px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.container{max-width:980px;margin:0 auto;padding:24px 20px}
 
-  /* 상단 고정비 요약 */
-  .budget-header {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin-bottom: 24px;
-  }
-  .b-card {
-    background: var(--surface);
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-  }
-  .b-card-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
-  .b-card-val { font-size: 16px; font-weight: 700; color: var(--text); }
-  .b-card-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .b-card.salary .b-card-val { color: var(--other); }
-  .b-card.spent .b-card-val { color: var(--move); }
-  .b-card.remain .b-card-val { color: var(--util); }
+/* 요약 카드 */
+.budget-header{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px}
+.b-card{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px 14px}
+.b-label{font-size:11px;color:var(--text2);margin-bottom:4px}
+.b-val{font-size:16px;font-weight:700}
+.b-sub{font-size:11px;color:var(--text3);margin-top:2px}
 
-  /* 달력 헤더 */
-  .cal-nav {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .cal-nav-btn {
-    background: var(--surface); border: 0.5px solid var(--border2);
-    border-radius: 8px; padding: 6px 14px; cursor: pointer;
-    font-size: 13px; color: var(--text2); font-family: inherit;
-    transition: background 0.15s;
-  }
-  .cal-nav-btn:hover { background: var(--surface2); }
-  .cal-month { font-size: 20px; font-weight: 700; color: var(--text); }
+/* 달력 */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nav-btn{background:var(--surface);border:0.5px solid var(--border2);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:var(--text2);font-family:inherit;transition:background .15s}
+.cal-nav-btn:hover{background:var(--surface2)}
+.cal-month{font-size:20px;font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
+.leg-dot{width:9px;height:9px;border-radius:3px}
+.cal-wrap{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:0.5px solid var(--border)}
+.cal-dow-cell{text-align:center;padding:8px 0;font-size:11px;font-weight:500;color:var(--text2)}
+.cal-dow-cell.sun{color:var(--move)}
+.cal-dow-cell.sat{color:var(--util)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-cell{min-height:88px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border);padding:5px 4px;cursor:pointer;transition:background .1s;position:relative}
+.cal-cell:nth-child(7n){border-right:none}
+.cal-cell:hover{background:var(--surface2)}
+.cal-cell.other-month{background:#fbfaf8}
+.cal-cell.other-month .day-num{color:var(--text3)}
+.cal-cell.today{background:#fffaf5}
+.day-num{font-size:12px;font-weight:500;color:var(--text2);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:2px}
+.cal-cell.today .day-num{background:var(--text);color:#fff}
+.day-num.sun{color:var(--move)}
+.day-num.sat{color:var(--util)}
+.cal-cell.today .day-num.sun,.cal-cell.today .day-num.sat{color:#fff}
+.event-chip{display:flex;align-items:center;font-size:10px;padding:2px 4px;border-radius:4px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.event-chip.done{opacity:.4;text-decoration:line-through}
+.event-chip.cat-rent{background:var(--rent-bg);color:var(--rent)}
+.event-chip.cat-util{background:var(--util-bg);color:var(--util)}
+.event-chip.cat-food{background:var(--food-bg);color:var(--food)}
+.event-chip.cat-misc{background:var(--misc-bg);color:var(--misc)}
+.event-chip.cat-move{background:var(--move-bg);color:var(--move)}
+.event-chip.cat-other{background:var(--other-bg);color:var(--other)}
+.more-tag{font-size:9px;color:var(--text3)}
 
-  /* 달력 그리드 */
-  .cal-wrap {
-    background: var(--surface);
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
-  }
-  .cal-dow {
-    display: grid; grid-template-columns: repeat(7,1fr);
-    background: var(--surface2);
-    border-bottom: 0.5px solid var(--border);
-  }
-  .cal-dow-cell {
-    text-align: center; padding: 8px 0;
-    font-size: 11px; font-weight: 500; color: var(--text2);
-  }
-  .cal-dow-cell.sun { color: var(--move); }
-  .cal-dow-cell.sat { color: var(--util); }
-  .cal-grid {
-    display: grid; grid-template-columns: repeat(7,1fr);
-  }
-  .cal-cell {
-    min-height: 90px;
-    border-right: 0.5px solid var(--border);
-    border-bottom: 0.5px solid var(--border);
-    padding: 6px 5px;
-    cursor: pointer;
-    transition: background 0.1s;
-    position: relative;
-  }
-  .cal-cell:nth-child(7n) { border-right: none; }
-  .cal-cell:hover { background: var(--surface2); }
-  .cal-cell.other-month { background: #fbfaf8; }
-  .cal-cell.other-month .day-num { color: var(--text3); }
-  .cal-cell.today { background: #fffaf5; }
-  .day-num {
-    font-size: 12px; font-weight: 500; color: var(--text2);
-    width: 22px; height: 22px; display: flex; align-items: center;
-    justify-content: center; border-radius: 50%; margin-bottom: 3px;
-  }
-  .cal-cell.today .day-num {
-    background: var(--today); color: #fff;
-  }
-  .day-num.sun { color: var(--move); }
-  .day-num.sat { color: var(--util); }
-  .cal-cell.today .day-num.sun,
-  .cal-cell.today .day-num.sat { color: #fff; }
+/* 하단 패널 */
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.panel-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px}
+.form-row{display:flex;flex-direction:column;gap:8px}
+.form-row input,.form-row select{width:100%;padding:8px 10px;border:0.5px solid var(--border2);border-radius:7px;font-family:inherit;font-size:13px;background:var(--bg);color:var(--text);outline:none;transition:border .15s}
+.form-row input:focus,.form-row select:focus{border-color:var(--accent)}
+.form-row-inline{display:flex;gap:6px}
+.form-row-inline input,.form-row-inline select{flex:1}
+.add-btn{width:100%;padding:9px;background:var(--text);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;margin-top:4px;transition:opacity .15s}
+.add-btn:hover{opacity:.8}
 
-  .event-chip {
-    display: flex; align-items: center; gap: 3px;
-    font-size: 10px; padding: 2px 5px; border-radius: 4px;
-    margin-bottom: 2px; cursor: pointer;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 100%;
-  }
-  .event-chip.done { opacity: 0.4; text-decoration: line-through; }
-  .event-chip.cat-rent    { background: var(--rent-bg); color: var(--rent); }
-  .event-chip.cat-util    { background: var(--util-bg); color: var(--util); }
-  .event-chip.cat-food    { background: var(--food-bg); color: var(--food); }
-  .event-chip.cat-misc    { background: var(--misc-bg); color: var(--misc); }
-  .event-chip.cat-move    { background: var(--move-bg); color: var(--move); }
-  .event-chip.cat-other   { background: var(--other-bg); color: var(--other); }
-  .more-tag { font-size: 9px; color: var(--text3); }
+/* 지출 목록 */
+.list-scroll{max-height:300px;overflow-y:auto}
+.list-item{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:12px}
+.list-item:last-child{border-bottom:none}
+.list-item.done .list-name{text-decoration:line-through;color:var(--text3)}
+.list-check{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);flex-shrink:0}
+.list-date{color:var(--text3);width:36px;flex-shrink:0;font-size:11px}
+.list-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-amt{color:var(--text2);font-weight:500;white-space:nowrap;font-size:12px}
+.list-cat{flex-shrink:0}
+.cat-pill{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:500}
+.cat-pill.cat-rent{background:var(--rent-bg);color:var(--rent)}
+.cat-pill.cat-util{background:var(--util-bg);color:var(--util)}
+.cat-pill.cat-food{background:var(--food-bg);color:var(--food)}
+.cat-pill.cat-misc{background:var(--misc-bg);color:var(--misc)}
+.cat-pill.cat-move{background:var(--move-bg);color:var(--move)}
+.cat-pill.cat-other{background:var(--other-bg);color:var(--other)}
+.del-btn{background:none;border:0.5px solid transparent;color:var(--text3);font-size:13px;padding:2px 6px;border-radius:5px;cursor:pointer;flex-shrink:0;line-height:1;transition:all .15s}
+.del-btn:hover{background:var(--move-bg);color:var(--move);border-color:var(--move)}
 
-  /* 하단 영역 */
-  .bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+/* Gmail 패널 */
+.gmail-panel{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+.gmail-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.gmail-desc{font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.gmail-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:var(--surface);border:0.5px solid var(--border2);border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--text);transition:background .15s;font-weight:500}
+.gmail-btn:hover{background:var(--surface2)}
+.gmail-btn img{width:16px;height:16px}
+.gmail-connected-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.gmail-tag{font-size:11px;background:var(--other-bg);color:var(--other);padding:3px 8px;border-radius:10px;font-weight:500}
+.gmail-email{font-size:12px;color:var(--text2)}
+.gmail-logout{font-size:11px;padding:3px 8px;border:0.5px solid var(--border2);border-radius:5px;background:none;cursor:pointer;color:var(--text2);font-family:inherit}
+.gmail-logout:hover{background:var(--surface2)}
+.gmail-results{margin-top:10px}
+.gmail-mail-item{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:12px}
+.gmail-mail-name{flex:1;color:var(--text)}
+.gmail-mail-amt{font-weight:700;color:var(--util);white-space:nowrap}
+.gmail-mail-date{color:var(--text3);font-size:11px;white-space:nowrap}
+.gmail-add-btn{font-size:11px;padding:3px 8px;background:var(--util);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.gmail-add-btn:hover{opacity:.85}
+.gmail-empty{font-size:12px;color:var(--text3);text-align:center;padding:12px 0}
+.gmail-loading{font-size:12px;color:var(--text2);text-align:center;padding:12px 0}
+.gmail-setup{background:var(--util-bg);border:0.5px solid var(--util);border-radius:8px;padding:12px;font-size:12px;color:var(--util);margin-top:10px;line-height:1.7}
+.gmail-setup a{color:var(--util);font-weight:700}
 
-  /* 추가 폼 */
-  .panel {
-    background: var(--surface);
-    border: 0.5px solid var(--border2);
-    border-radius: var(--radius);
-    padding: 16px 18px;
-    box-shadow: var(--shadow);
-  }
-  .panel-title {
-    font-size: 13px; font-weight: 700; color: var(--text);
-    margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
-  }
-  .form-row { display: flex; flex-direction: column; gap: 8px; }
-  .form-row input, .form-row select {
-    width: 100%; padding: 8px 10px; border: 0.5px solid var(--border2);
-    border-radius: 7px; font-family: inherit; font-size: 13px;
-    background: var(--bg); color: var(--text);
-    outline: none; transition: border 0.15s;
-  }
-  .form-row input:focus, .form-row select:focus {
-    border-color: var(--accent);
-  }
-  .form-row-inline { display: flex; gap: 6px; }
-  .form-row-inline input, .form-row-inline select { flex: 1; }
-  .add-btn {
-    width: 100%; padding: 9px; background: var(--text);
-    color: #fff; border: none; border-radius: 7px;
-    font-family: inherit; font-size: 13px; font-weight: 500;
-    cursor: pointer; margin-top: 4px; transition: opacity 0.15s;
-  }
-  .add-btn:hover { opacity: 0.8; }
-
-  /* 목록 */
-  .list-scroll { max-height: 320px; overflow-y: auto; }
-  .list-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 7px 0; border-bottom: 0.5px solid var(--border);
-    font-size: 12px;
-  }
-  .list-item:last-child { border-bottom: none; }
-  .list-item.done .list-name { text-decoration: line-through; color: var(--text3); }
-  .list-check { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
-  .list-date { color: var(--text3); width: 38px; flex-shrink: 0; }
-  .list-name { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .list-amt { color: var(--text2); font-weight: 500; white-space: nowrap; }
-  .list-cat { flex-shrink: 0; }
-  .list-del {
-    background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 12px; padding: 2px 4px;
-    border-radius: 4px; flex-shrink: 0;
-  }
-  .list-del:hover { color: var(--move); background: var(--move-bg); }
-  .cat-pill {
-    font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 500;
-  }
-  .cat-pill.cat-rent  { background: var(--rent-bg); color: var(--rent); }
-  .cat-pill.cat-util  { background: var(--util-bg); color: var(--util); }
-  .cat-pill.cat-food  { background: var(--food-bg); color: var(--food); }
-  .cat-pill.cat-misc  { background: var(--misc-bg); color: var(--misc); }
-  .cat-pill.cat-move  { background: var(--move-bg); color: var(--move); }
-  .cat-pill.cat-other { background: var(--other-bg); color: var(--other); }
-
-  /* 범례 */
-  .legend {
-    display: flex; flex-wrap: wrap; gap: 10px;
-    margin-bottom: 14px;
-  }
-  .leg { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text2); }
-  .leg-dot { width: 9px; height: 9px; border-radius: 3px; }
-
-  /* 반응형 */
-  @media(max-width: 640px) {
-    .budget-header { grid-template-columns: repeat(2,1fr); }
-    .bottom { grid-template-columns: 1fr; }
-    .cal-cell { min-height: 60px; }
-    .event-chip { font-size: 9px; }
-  }
+@media(max-width:640px){
+  .budget-header{grid-template-columns:repeat(2,1fr)}
+  .bottom{grid-template-columns:1fr}
+  .cal-cell{min-height:60px}
+}
 </style>
 </head>
 <body>
 <div class="container">
 
-  <div class="budget-header" id="budget-header"></div>
+<div class="budget-header" id="budget-header"></div>
 
-  <div class="cal-nav">
-    <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ 이전</button>
-    <div class="cal-month" id="cal-month-title"></div>
-    <button class="cal-nav-btn" onclick="changeMonth(1)">다음 ▶</button>
-  </div>
-
-  <div class="legend">
-    <span class="leg"><span class="leg-dot" style="background:var(--rent-bg);border:1px solid var(--rent)"></span>월세</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--util-bg);border:1px solid var(--util)"></span>공과금</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--food-bg);border:1px solid var(--food)"></span>식비</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--misc-bg);border:1px solid var(--misc)"></span>소모품</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--move-bg);border:1px solid var(--move)"></span>이사관련</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--other-bg);border:1px solid var(--other)"></span>기타</span>
-  </div>
-
-  <div class="cal-wrap">
-    <div class="cal-dow">
-      <div class="cal-dow-cell sun">일</div>
-      <div class="cal-dow-cell">월</div>
-      <div class="cal-dow-cell">화</div>
-      <div class="cal-dow-cell">수</div>
-      <div class="cal-dow-cell">목</div>
-      <div class="cal-dow-cell">금</div>
-      <div class="cal-dow-cell sat">토</div>
-    </div>
-    <div class="cal-grid" id="cal-grid"></div>
-  </div>
-
-  <div class="bottom">
-    <div class="panel">
-      <div class="panel-title">+ 지출 추가</div>
-      <div class="form-row">
-        <input type="date" id="inp-date" value="2026-06-15">
-        <input type="text" id="inp-name" placeholder="항목명 (예: 마트 장보기)">
-        <div class="form-row-inline">
-          <input type="number" id="inp-amt" placeholder="금액 (원)" min="0" step="1000">
-          <select id="inp-cat">
-            <option value="food">식비</option>
-            <option value="misc">소모품</option>
-            <option value="rent">월세</option>
-            <option value="util">공과금</option>
-            <option value="move">이사관련</option>
-            <option value="other">기타</option>
-          </select>
-        </div>
-        <input type="text" id="inp-memo" placeholder="메모 (선택)">
-        <button class="add-btn" onclick="addItem()">추가하기</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">이번 달 지출 목록</div>
-      <div class="list-scroll" id="list-body"></div>
-    </div>
-  </div>
-
+<div class="cal-nav">
+  <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ 이전</button>
+  <div class="cal-month" id="cal-month-title"></div>
+  <button class="cal-nav-btn" onclick="changeMonth(1)">다음 ▶</button>
 </div>
 
-<script>
-const BUDGET = { salary: 1500000, rent: 660000, util: 150000, food: 500000 };
-BUDGET.misc = BUDGET.salary - BUDGET.rent - BUDGET.util - BUDGET.food; // 190,000
+<div class="legend">
+  <span class="leg"><span class="leg-dot" style="background:var(--rent-bg);border:1px solid var(--rent)"></span>월세</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--util-bg);border:1px solid var(--util)"></span>공과금</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--food-bg);border:1px solid var(--food)"></span>식비</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--misc-bg);border:1px solid var(--misc)"></span>소모품</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--move-bg);border:1px solid var(--move)"></span>이사관련</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--other-bg);border:1px solid var(--other)"></span>기타</span>
+</div>
 
+<div class="cal-wrap">
+  <div class="cal-dow">
+    <div class="cal-dow-cell sun">일</div>
+    <div class="cal-dow-cell">월</div><div class="cal-dow-cell">화</div>
+    <div class="cal-dow-cell">수</div><div class="cal-dow-cell">목</div>
+    <div class="cal-dow-cell">금</div>
+    <div class="cal-dow-cell sat">토</div>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+</div>
+
+<!-- Gmail 연동 패널 -->
+<div class="gmail-panel">
+  <div class="gmail-title">📧 Gmail 공과금 자동 불러오기</div>
+  <div id="gmail-area">
+    <p class="gmail-desc">Google 계정을 연결하면 공과금·관리비 메일을 자동으로 읽어서 달력에 추가할 수 있어요.</p>
+    <button class="gmail-btn" onclick="gmailLogin()">
+      <img src="https://www.google.com/favicon.ico" alt="Google">
+      Google 계정 연결
+    </button>
+    <div class="gmail-setup">
+      ⚠️ Gmail 연동을 사용하려면 <strong>Google Cloud Console</strong>에서 OAuth 앱을 등록해야 해요.<br>
+      <strong>설정 방법:</strong><br>
+      1. <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> 접속<br>
+      2. 새 프로젝트 생성 → Gmail API 활성화<br>
+      3. OAuth 2.0 클라이언트 ID 생성 (웹 애플리케이션)<br>
+      4. 아래 CLIENT_ID 변수에 발급받은 ID 입력<br>
+      5. 승인된 리디렉션 URI에 이 페이지 URL 추가<br>
+      <br>
+      📌 현재는 <strong>데모 모드</strong>로 샘플 공과금 데이터를 확인할 수 있어요.
+    </div>
+    <div style="margin-top:10px">
+      <button class="gmail-btn" onclick="loadDemoMails()" style="background:var(--util-bg);border-color:var(--util);color:var(--util)">
+        🔍 데모로 공과금 메일 확인해보기
+      </button>
+    </div>
+  </div>
+  <div id="gmail-connected-area" style="display:none">
+    <div class="gmail-connected-row">
+      <span class="gmail-tag">✓ 연결됨</span>
+      <span class="gmail-email" id="gmail-user-email"></span>
+      <button class="gmail-logout" onclick="gmailLogout()">연결 해제</button>
+    </div>
+    <button class="gmail-btn" onclick="fetchGmailBills()">🔍 공과금 메일 불러오기</button>
+    <div class="gmail-results" id="gmail-results"></div>
+  </div>
+  <div id="gmail-demo-area" style="display:none">
+    <div style="margin-bottom:8px;font-size:12px;color:var(--text2)">📬 샘플 공과금 메일 목록 — 달력에 추가하려면 <strong>추가</strong> 버튼을 누르세요</div>
+    <div id="gmail-demo-list"></div>
+  </div>
+</div>
+
+<div class="bottom">
+  <div class="panel">
+    <div class="panel-title">+ 지출 추가</div>
+    <div class="form-row">
+      <input type="date" id="inp-date" value="2026-06-15">
+      <input type="text" id="inp-name" placeholder="항목명 (예: 마트 장보기)">
+      <div class="form-row-inline">
+        <input type="number" id="inp-amt" placeholder="금액 (원)" min="0" step="1000">
+        <select id="inp-cat">
+          <option value="food">식비</option>
+          <option value="misc">소모품</option>
+          <option value="rent">월세</option>
+          <option value="util">공과금</option>
+          <option value="move">이사관련</option>
+          <option value="other">기타</option>
+        </select>
+      </div>
+      <input type="text" id="inp-memo" placeholder="메모 (선택)">
+      <button class="add-btn" onclick="addItem()">추가하기</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">이번 달 지출 목록</div>
+    <div class="list-scroll" id="list-body"></div>
+  </div>
+</div>
+
+</div>
+<script>
+// ★ Google Cloud Console에서 발급받은 Client ID로 교체하세요
+const GMAIL_CLIENT_ID = '467247314254-1m6btp5roffjs516n6gtiv9rhsfnup0j.apps.googleusercontent.com';
+const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly';
+
+const BUDGET = { salary:1500000, rent:660000, util:150000, food:500000 };
+BUDGET.misc = BUDGET.salary - BUDGET.rent - BUDGET.util - BUDGET.food;
 const CAT_LABEL = { rent:'월세', util:'공과금', food:'식비', misc:'소모품', move:'이사관련', other:'기타' };
 const MONTHS_KR = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
-let curYear = 2026, curMonth = 5;
+let curYear=2026, curMonth=5, nextId=100, items=[], gmailToken=null;
 
 // 7~12월 고정비 자동 생성
-let items = [];
-let nextId = 100;
-
-for (let m = 6; m <= 11; m++) {
-  const mo = String(m + 1).padStart(2, '0');
-  items.push({ id: nextId++, date: `2026-${mo}-14`, name: '월세', amount: 660000, cat: 'rent', done: false, memo: '' });
-  items.push({ id: nextId++, date: `2026-${mo}-17`, name: '공과금', amount: 150000, cat: 'util', done: false, memo: '' });
+for(let m=6;m<=11;m++){
+  const mo=String(m+1).padStart(2,'0');
+  items.push({id:nextId++,date:`2026-${mo}-14`,name:'월세',amount:660000,cat:'rent',done:false,memo:''});
+  items.push({id:nextId++,date:`2026-${mo}-17`,name:'공과금',amount:150000,cat:'util',done:false,memo:''});
 }
-items.push({ id: nextId++, date: '2026-06-15', name: '🚚 이사', amount: 0, cat: 'move', done: false, memo: '이사비용 확정 후 금액 수정' });
+items.push({id:nextId++,date:'2026-06-15',name:'🚚 이사',amount:0,cat:'move',done:false,memo:'이사비용 확정 후 금액 수정'});
 
-function fmt(n) {
-  if (!n) return '0원';
-  return Math.round(n).toLocaleString('ko-KR') + '원';
-}
-function fmtShort(n) {
-  if (!n) return '-';
-  if (n >= 10000) return Math.round(n / 10000) + '만';
-  return Math.round(n / 1000) + '천';
-}
+function fmt(n){if(!n)return '0원';return Math.round(n).toLocaleString('ko-KR')+'원';}
+function fmtShort(n){if(!n)return '-';if(n>=10000)return Math.round(n/10000)+'만';return Math.round(n/1000)+'천';}
+function getMonthItems(y,m){const p=`${y}-${String(m+1).padStart(2,'0')}`;return items.filter(it=>it.date.startsWith(p));}
 
-function getMonthItems(y, m) {
-  const prefix = `${y}-${String(m + 1).padStart(2, '0')}`;
-  return items.filter(it => it.date.startsWith(prefix));
-}
-
-function renderHeader() {
-  const mi = getMonthItems(curYear, curMonth);
-  const totalSpent = mi.reduce((s, it) => s + (it.amount || 0), 0);
-  const done = mi.filter(it => it.done).reduce((s, it) => s + (it.amount || 0), 0);
-  const remain = BUDGET.salary - totalSpent;
-
-  document.getElementById('budget-header').innerHTML = `
-    <div class="b-card salary"><div class="b-card-label">세후 월급</div><div class="b-card-val">${fmt(BUDGET.salary)}</div></div>
-    <div class="b-card"><div class="b-card-label">월세</div><div class="b-card-val" style="color:var(--rent)">${fmt(BUDGET.rent)}</div><div class="b-card-sub">매월 14일</div></div>
-    <div class="b-card"><div class="b-card-label">공과금</div><div class="b-card-val" style="color:var(--util)">${fmt(BUDGET.util)}</div><div class="b-card-sub">매월 17일</div></div>
-    <div class="b-card spent"><div class="b-card-label">이번 달 합계</div><div class="b-card-val">${fmt(totalSpent)}</div><div class="b-card-sub">완료 ${fmt(done)}</div></div>
-    <div class="b-card remain"><div class="b-card-label">잔액 예상</div><div class="b-card-val" style="color:${remain >= 0 ? 'var(--other)' : 'var(--move)'}">${fmt(remain)}</div></div>
-  `;
+function renderHeader(){
+  const mi=getMonthItems(curYear,curMonth);
+  const total=mi.reduce((s,it)=>s+(it.amount||0),0);
+  const done=mi.filter(it=>it.done).reduce((s,it)=>s+(it.amount||0),0);
+  const remain=BUDGET.salary-total;
+  document.getElementById('budget-header').innerHTML=`
+    <div class="b-card"><div class="b-label">세후 월급</div><div class="b-val" style="color:var(--other)">${fmt(BUDGET.salary)}</div></div>
+    <div class="b-card"><div class="b-label">월세</div><div class="b-val" style="color:var(--rent)">${fmt(BUDGET.rent)}</div><div class="b-sub">매월 14일</div></div>
+    <div class="b-card"><div class="b-label">공과금</div><div class="b-val" style="color:var(--util)">${fmt(BUDGET.util)}</div><div class="b-sub">매월 17일</div></div>
+    <div class="b-card"><div class="b-label">이번 달 합계</div><div class="b-val" style="color:var(--move)">${fmt(total)}</div><div class="b-sub">완료 ${fmt(done)}</div></div>
+    <div class="b-card"><div class="b-label">잔액 예상</div><div class="b-val" style="color:${remain>=0?'var(--other)':'var(--move)'}">${fmt(remain)}</div></div>`;
 }
 
-function renderCal() {
-  document.getElementById('cal-month-title').textContent = `2026년 ${MONTHS_KR[curMonth]}`;
-  const y = curYear, m = curMonth;
-  const firstDow = new Date(y, m, 1).getDay();
-  const lastDate = new Date(y, m + 1, 0).getDate();
-  const prevLast = new Date(y, m, 0).getDate();
-  const today = new Date();
-  let html = '';
-
-  for (let i = 0; i < firstDow; i++) {
-    html += `<div class="cal-cell other-month"><div class="day-num">${prevLast - firstDow + i + 1}</div></div>`;
+function renderCal(){
+  document.getElementById('cal-month-title').textContent=`2026년 ${MONTHS_KR[curMonth]}`;
+  const y=curYear,m=curMonth;
+  const firstDow=new Date(y,m,1).getDay();
+  const lastDate=new Date(y,m+1,0).getDate();
+  const prevLast=new Date(y,m,0).getDate();
+  const today=new Date();
+  let html='';
+  for(let i=0;i<firstDow;i++)html+=`<div class="cal-cell other-month"><div class="day-num">${prevLast-firstDow+i+1}</div></div>`;
+  for(let d=1;d<=lastDate;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow=new Date(y,m,d).getDay();
+    const isToday=today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d;
+    const di=items.filter(it=>it.date===ds);
+    const chips=di.slice(0,3).map(it=>`<div class="event-chip cat-${it.cat}${it.done?' done':''}" onclick="toggleItem(${it.id});event.stopPropagation();" title="${it.name}: ${fmt(it.amount)}">${it.amount>0?fmtShort(it.amount)+' ':''}${it.name}</div>`).join('');
+    const more=di.length>3?`<div class="more-tag">+${di.length-3}개</div>`:'';
+    html+=`<div class="cal-cell${isToday?' today':''}" onclick="setDate('${ds}')"><div class="day-num${dow===0?' sun':dow===6?' sat':''}">${d}</div>${chips}${more}</div>`;
   }
-
-  for (let d = 1; d <= lastDate; d++) {
-    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const dow = new Date(y, m, d).getDay();
-    const isToday = today.getFullYear() === y && today.getMonth() === m && today.getDate() === d;
-    const dayItems = items.filter(it => it.date === dateStr);
-
-    const chips = dayItems.slice(0, 3).map(it => `
-      <div class="event-chip cat-${it.cat} ${it.done ? 'done' : ''}" onclick="toggleItem(${it.id}); event.stopPropagation();" title="${it.name}: ${fmt(it.amount)}">
-        ${it.amount > 0 ? fmtShort(it.amount) + ' ' : ''}${it.name}
-      </div>`).join('');
-    const more = dayItems.length > 3 ? `<div class="more-tag">+${dayItems.length - 3}개</div>` : '';
-
-    html += `<div class="cal-cell${isToday ? ' today' : ''}" onclick="setDate('${dateStr}')">
-      <div class="day-num${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}">${d}</div>
-      ${chips}${more}
-    </div>`;
-  }
-
-  const total = firstDow + lastDate;
-  const remain = Math.ceil(total / 7) * 7 - total;
-  for (let d = 1; d <= remain; d++) {
-    html += `<div class="cal-cell other-month"><div class="day-num">${d}</div></div>`;
-  }
-
-  document.getElementById('cal-grid').innerHTML = html;
+  const rem=Math.ceil((firstDow+lastDate)/7)*7-(firstDow+lastDate);
+  for(let d=1;d<=rem;d++)html+=`<div class="cal-cell other-month"><div class="day-num">${d}</div></div>`;
+  document.getElementById('cal-grid').innerHTML=html;
 }
 
-function renderList() {
-  const mi = getMonthItems(curYear, curMonth).sort((a, b) => a.date.localeCompare(b.date));
-  if (!mi.length) {
-    document.getElementById('list-body').innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px 0;font-size:12px">이번 달 지출 내역이 없어요</div>';
-    return;
-  }
-  document.getElementById('list-body').innerHTML = mi.map(it => {
-    const d = it.date.slice(5).replace('-', '/');
-    return `<div class="list-item${it.done ? ' done' : ''}">
-      <input type="checkbox" class="list-check" ${it.done ? 'checked' : ''} onchange="toggleItem(${it.id})">
+function renderList(){
+  const mi=getMonthItems(curYear,curMonth).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!mi.length){document.getElementById('list-body').innerHTML='<div style="text-align:center;color:var(--text3);padding:24px 0;font-size:12px">이번 달 지출 내역이 없어요</div>';return;}
+  document.getElementById('list-body').innerHTML=mi.map(it=>{
+    const d=it.date.slice(5).replace('-','/');
+    return `<div class="list-item${it.done?' done':''}">
+      <input type="checkbox" class="list-check" ${it.done?'checked':''} onchange="toggleItem(${it.id})">
       <span class="list-date">${d}</span>
       <span class="list-name">${it.name}</span>
       <span class="list-amt">${fmt(it.amount)}</span>
       <span class="list-cat"><span class="cat-pill cat-${it.cat}">${CAT_LABEL[it.cat]}</span></span>
-      <button class="list-del" onclick="deleteItem(${it.id})" title="삭제">✕</button>
+      <button class="del-btn" onclick="deleteItem(${it.id})">✕</button>
     </div>`;
   }).join('');
 }
 
-function render() { renderHeader(); renderCal(); renderList(); }
-
-function changeMonth(d) {
-  curMonth += d;
-  if (curMonth < 0) { curMonth = 11; curYear--; }
-  if (curMonth > 11) { curMonth = 0; curYear++; }
+function render(){renderHeader();renderCal();renderList();}
+function changeMonth(d){curMonth+=d;if(curMonth<0){curMonth=11;curYear--;}if(curMonth>11){curMonth=0;curYear++;}render();}
+function setDate(ds){document.getElementById('inp-date').value=ds;document.getElementById('inp-name').focus();}
+function toggleItem(id){const it=items.find(i=>i.id===id);if(it)it.done=!it.done;render();}
+function deleteItem(id){items=items.filter(i=>i.id!==id);render();}
+function addItem(){
+  const date=document.getElementById('inp-date').value;
+  const name=document.getElementById('inp-name').value.trim();
+  const amount=parseInt(document.getElementById('inp-amt').value)||0;
+  const cat=document.getElementById('inp-cat').value;
+  const memo=document.getElementById('inp-memo').value.trim();
+  if(!date||!name){alert('날짜와 항목명을 입력해주세요');return;}
+  items.push({id:nextId++,date,name,amount,cat,done:false,memo});
+  document.getElementById('inp-name').value='';
+  document.getElementById('inp-amt').value='';
+  document.getElementById('inp-memo').value='';
+  const [y,mo]=date.split('-').map(Number);
+  curYear=y;curMonth=mo-1;
   render();
 }
 
-function setDate(dateStr) {
-  document.getElementById('inp-date').value = dateStr;
-  document.getElementById('inp-name').focus();
+// ── Gmail 연동 ──────────────────────────────────────────
+function gmailLogin(){
+  if(GMAIL_CLIENT_ID.startsWith('YOUR_')){
+    alert('Gmail 연동을 사용하려면 Google Cloud Console에서 Client ID를 발급받아 코드의 GMAIL_CLIENT_ID 변수에 입력해주세요.\n\n지금은 데모 모드로 샘플 데이터를 확인해보세요!');
+    return;
+  }
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:GMAIL_CLIENT_ID,
+    scope:GMAIL_SCOPES,
+    callback:(res)=>{
+      if(res.access_token){
+        gmailToken=res.access_token;
+        showGmailConnected('연결된 계정');
+      }
+    }
+  });
+  client.requestAccessToken();
 }
 
-function toggleItem(id) {
-  const it = items.find(i => i.id === id);
-  if (it) it.done = !it.done;
-  render();
+function showGmailConnected(email){
+  document.getElementById('gmail-area').style.display='none';
+  document.getElementById('gmail-demo-area').style.display='none';
+  document.getElementById('gmail-connected-area').style.display='block';
+  document.getElementById('gmail-user-email').textContent=email;
 }
 
-function deleteItem(id) {
-  if (!confirm('삭제할까요?')) return;
-  items = items.filter(i => i.id !== id);
-  render();
+function gmailLogout(){
+  gmailToken=null;
+  document.getElementById('gmail-connected-area').style.display='none';
+  document.getElementById('gmail-area').style.display='block';
 }
 
-function addItem() {
-  const date = document.getElementById('inp-date').value;
-  const name = document.getElementById('inp-name').value.trim();
-  const amount = parseInt(document.getElementById('inp-amt').value) || 0;
-  const cat = document.getElementById('inp-cat').value;
-  const memo = document.getElementById('inp-memo').value.trim();
-  if (!date || !name) { alert('날짜와 항목명을 입력해주세요'); return; }
-  items.push({ id: nextId++, date, name, amount, cat, done: false, memo });
-  document.getElementById('inp-name').value = '';
-  document.getElementById('inp-amt').value = '';
-  document.getElementById('inp-memo').value = '';
-  const [y, mo] = date.split('-').map(Number);
-  curYear = y; curMonth = mo - 1;
+async function fetchGmailBills(){
+  if(!gmailToken)return;
+  const res=document.getElementById('gmail-results');
+  res.innerHTML='<div class="gmail-loading">메일 검색 중...</div>';
+  try{
+    const q=encodeURIComponent('subject:(공과금 OR 관리비 OR 전기요금 OR 가스요금 OR 수도요금 OR 인터넷요금) newer_than:3m');
+    const r=await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=10`,{headers:{Authorization:`Bearer ${gmailToken}`}});
+    const data=await r.json();
+    if(!data.messages||!data.messages.length){res.innerHTML='<div class="gmail-empty">최근 3개월 공과금 메일을 찾지 못했어요</div>';return;}
+    const mails=await Promise.all(data.messages.slice(0,5).map(m=>
+      fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=Date`,{headers:{Authorization:`Bearer ${gmailToken}`}}).then(r=>r.json())
+    ));
+    const parsed=mails.map(m=>{
+      const subj=m.payload.headers.find(h=>h.name==='Subject')?.value||'공과금';
+      const dateH=m.payload.headers.find(h=>h.name==='Date')?.value||'';
+      const dateObj=new Date(dateH);
+      const dateStr=isNaN(dateObj)?'2026-06-17':`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
+      const amtMatch=m.snippet.match(/([0-9,]+)\s*원/);
+      const amount=amtMatch?parseInt(amtMatch[1].replace(/,/g,'')): 0;
+      return {name:subj.slice(0,20),date:dateStr,amount,snippet:m.snippet.slice(0,50)};
+    });
+    res.innerHTML=parsed.map((p,i)=>`
+      <div class="gmail-mail-item">
+        <div style="flex:1"><div class="gmail-mail-name">${p.name}</div><div style="font-size:10px;color:var(--text3)">${p.snippet}</div></div>
+        <span class="gmail-mail-date">${p.date.slice(5).replace('-','/')}</span>
+        <span class="gmail-mail-amt">${fmt(p.amount)}</span>
+        <button class="gmail-add-btn" onclick="addFromGmail('${p.date}','${p.name}',${p.amount})">+ 추가</button>
+      </div>`).join('');
+  }catch(e){res.innerHTML='<div class="gmail-empty">메일을 불러오지 못했어요. 다시 시도해주세요.</div>';}
+}
+
+// 데모 모드 샘플 데이터
+function loadDemoMails(){
+  document.getElementById('gmail-demo-area').style.display='block';
+  const samples=[
+    {date:'2026-06-17',name:'한국전력 6월 전기요금',amount:47200,snippet:'6월분 전기요금 47,200원이 청구되었습니다.'},
+    {date:'2026-06-17',name:'도시가스 6월 요금고지',amount:28500,snippet:'6월분 도시가스 요금 28,500원 납부 안내'},
+    {date:'2026-06-17',name:'아파트 6월 관리비',amount:85000,snippet:'6월분 관리비 85,000원 납부 기한 6/25'},
+    {date:'2026-06-20',name:'KT 인터넷 요금',amount:33000,snippet:'6월 인터넷 요금 33,000원이 자동납부됩니다.'},
+  ];
+  document.getElementById('gmail-demo-list').innerHTML=samples.map(p=>`
+    <div class="gmail-mail-item">
+      <div style="flex:1"><div class="gmail-mail-name">${p.name}</div><div style="font-size:10px;color:var(--text3)">${p.snippet}</div></div>
+      <span class="gmail-mail-date">${p.date.slice(5).replace('-','/')}</span>
+      <span class="gmail-mail-amt">${fmt(p.amount)}</span>
+      <button class="gmail-add-btn" onclick="addFromGmail('${p.date}','${p.name}',${p.amount})">+ 추가</button>
+    </div>`).join('');
+}
+
+function addFromGmail(date,name,amount){
+  items.push({id:nextId++,date,name,amount,cat:'util',done:false,memo:'Gmail 자동 등록'});
+  const [y,mo]=date.split('-').map(Number);
+  curYear=y;curMonth=mo-1;
   render();
+  alert(`"${name}" 항목을 달력에 추가했어요!`);
 }
 
 render();
