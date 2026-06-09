@@ -345,6 +345,43 @@ function gmailLogout(){
   document.getElementById('gmail-area').style.display='block';
 }
 
+// Base64url 디코딩
+function decodeBase64(str){
+  try{const b64=str.replace(/-/g,'+').replace(/_/g,'/');return decodeURIComponent(escape(atob(b64)));}
+  catch(e){try{return atob(str.replace(/-/g,'+').replace(/_/g,'/'))}catch(e2){return '';}}
+}
+// 메일 파트에서 텍스트 본문 추출 (재귀)
+function extractBody(payload){
+  if(!payload)return '';
+  if(payload.body&&payload.body.data)return decodeBase64(payload.body.data);
+  if(payload.parts){
+    for(const p of payload.parts){
+      if(p.mimeType==='text/plain'&&p.body&&p.body.data)return decodeBase64(p.body.data);
+    }
+    for(const p of payload.parts){
+      if(p.mimeType==='text/html'&&p.body&&p.body.data)return decodeBase64(p.body.data).replace(/<[^>]+>/g,' ');
+      if(p.parts){const n=extractBody(p);if(n)return n;}
+    }
+  }
+  return '';
+}
+// 텍스트에서 금액 파싱
+function parseAmount(text){
+  if(!text)return 0;
+  const patterns=[
+    /청구\s*금액[^\d]*([\d,]+)\s*원/,
+    /납부\s*금액[^\d]*([\d,]+)\s*원/,
+    /이용\s*금액[^\d]*([\d,]+)\s*원/,
+    /합\s*계[^\d]*([\d,]+)\s*원/,
+    /요\s*금[^\d]*([\d,]+)\s*원/,
+    /([\d,]{4,})\s*원/,
+  ];
+  for(const pat of patterns){
+    const m=text.match(pat);
+    if(m){const n=parseInt(m[1].replace(/,/g,''));if(n>100&&n<10000000)return n;}
+  }
+  return 0;
+}
 async function fetchGmailBills(){
   if(!gmailToken)return;
   const res=document.getElementById('gmail-results');
@@ -355,25 +392,35 @@ async function fetchGmailBills(){
     const data=await r.json();
     if(!data.messages||!data.messages.length){res.innerHTML='<div class="gmail-empty">최근 3개월 공과금 메일을 찾지 못했어요</div>';return;}
     const mails=await Promise.all(data.messages.slice(0,5).map(msg=>
-      fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=Date`,{headers:{Authorization:`Bearer ${gmailToken}`}}).then(r=>r.json())
+      fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=full`,{headers:{Authorization:`Bearer ${gmailToken}`}}).then(r=>r.json())
     ));
     const parsed=mails.map(msg=>{
       const subj=msg.payload.headers.find(h=>h.name==='Subject')?.value||'공과금';
       const dateH=msg.payload.headers.find(h=>h.name==='Date')?.value||'';
       const dateObj=new Date(dateH);
       const dateStr=isNaN(dateObj.getTime())?'2026-06-17':`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
-      const amtMatch=msg.snippet.match(/([0-9,]+)\s*원/);
-      const amount=amtMatch?parseInt(amtMatch[1].replace(/,/g,'')):0;
-      return{name:subj.slice(0,20),date:dateStr,amount,snippet:msg.snippet.slice(0,50)};
+      const body=extractBody(msg.payload);
+      const amount=parseAmount(body)||parseAmount(msg.snippet||'')||0;
+      const preview=(body||msg.snippet||'').replace(/\s+/g,' ').slice(0,60);
+      return{name:subj.slice(0,24),date:dateStr,amount,preview};
     });
     res.innerHTML=parsed.map(p=>`
       <div class="gmail-mail-item">
-        <div style="flex:1"><div class="gmail-mail-name">${p.name}</div><div style="font-size:10px;color:var(--text3)">${p.snippet}</div></div>
+        <div style="flex:1"><div class="gmail-mail-name">${p.name}</div><div style="font-size:10px;color:var(--text3)">${p.preview}</div></div>
         <span class="gmail-mail-date">${p.date.slice(5).replace('-','/')}</span>
-        <span class="gmail-mail-amt">${fmt(p.amount)}</span>
-        <button class="gmail-add-btn" onclick="addFromGmail('${p.date}','${p.name.replace(/'/g,'')}',${p.amount})">+ 추가</button>
+        <span class="gmail-mail-amt" style="${p.amount>0?'':'color:var(--move)'}">${p.amount>0?fmt(p.amount):'금액미확인'}</span>
+        <button class="gmail-add-btn" onclick="addFromGmailPrompt('${p.date}','${p.name.replace(/'/g,'')}',${p.amount})">+ 추가</button>
       </div>`).join('');
-  }catch(e){res.innerHTML='<div class="gmail-empty">메일을 불러오지 못했어요. 다시 시도해주세요.</div>';}
+  }catch(e){console.error(e);res.innerHTML='<div class="gmail-empty">메일을 불러오지 못했어요. 다시 시도해주세요.</div>';}
+}
+function addFromGmailPrompt(date,name,amount){
+  let a=amount;
+  if(!a){
+    const v=prompt(name+'\n금액을 직접 입력하세요 (숫자만)','');
+    if(v===null)return;
+    a=parseInt(v.replace(/,/g,''))||0;
+  }
+  addFromGmail(date,name,a);
 }
 
 function loadDemoMails(){
