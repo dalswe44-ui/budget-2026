@@ -43,14 +43,11 @@
     .card-amount { font-size: 1.3rem; font-weight: bold; margin-bottom: 5px; word-break: keep-all; }
     .card-desc { font-size: 0.75rem; color: #999; }
 
-    .text-green { color: var(--primary-green); } 
-    .text-orange { color: var(--primary-orange); }
-    .text-blue { color: var(--primary-blue); } 
-    .text-red { color: var(--primary-red); }
-    .text-yellow { color: var(--primary-yellow); }
-    .text-purple { color: var(--primary-purple); }
+    .text-green { color: var(--primary-green); } .text-orange { color: var(--primary-orange); }
+    .text-blue { color: var(--primary-blue); } .text-red { color: var(--primary-red); }
+    .text-yellow { color: var(--primary-yellow); } .text-purple { color: var(--primary-purple); }
 
-    /* 달력 컨트롤 & 범례 */
+    /* 달력 컨트롤 */
     .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .calendar-header h2 { margin: 0; font-size: 1.5rem; }
     .btn-nav { background: white; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; }
@@ -77,28 +74,27 @@
     .chip-utility { background-color: #ebf5fb; color: var(--primary-blue); border-left: 3px solid var(--primary-blue); }
     .chip-default { background-color: #f4f6f7; color: var(--text-main); border-left: 3px solid #ccc; }
 
-    /* 하단 입력 폼, 리스트, Gmail 섹션 */
-    .input-section, .list-section, .gmail-section { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    .input-section h3, .list-section h3, .gmail-section h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+    /* 하단 섹션 */
+    .input-section, .list-section { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .input-section h3, .list-section h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
     
-    /* 폼 그리드 (아이패드 반응형) */
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end; }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-group label { font-size: 0.85rem; font-weight: bold; color: var(--text-main); }
     .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; font-family: inherit; }
+    .form-group input[type="file"] { padding: 7px; font-size: 0.85rem; }
     .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
     
     .submit-btn { background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background 0.2s; }
     .submit-btn:hover { background: #2980b9; }
 
-    .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; }
     .expense-item:last-child { border-bottom: none; }
-    .expense-info { display: flex; align-items: center; gap: 10px; }
+    .expense-info { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .expense-amount-wrap { display: flex; align-items: center; gap: 15px; }
     .delete-btn { background: none; border: none; color: var(--primary-red); cursor: pointer; font-size: 1.1rem; padding: 0 5px; }
     
-    .gmail-btn { background: white; border: 1px solid #ccc; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
-    .info-box { background: #ebf5fb; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; color: #2980b9; }
+    .expense-photo { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -146,15 +142,6 @@
     <button class="btn-nav" onclick="changeMonth(1)">다음 ▶</button>
   </div>
 
-  <div class="category-legend">
-    <div class="legend-item"><div class="legend-color cat-rent"></div> 월세</div>
-    <div class="legend-item"><div class="legend-color cat-utility"></div> 공과금</div>
-    <div class="legend-item"><div class="legend-color cat-food"></div> 식비</div>
-    <div class="legend-item"><div class="legend-color cat-supplies"></div> 소모품</div>
-    <div class="legend-item"><div class="legend-color cat-move"></div> 이사관련</div>
-    <div class="legend-item"><div class="legend-color cat-etc"></div> 기타</div>
-  </div>
-
   <div class="calendar-grid">
     <div class="weekdays">
       <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
@@ -170,7 +157,7 @@
         <input type="date" id="form-date">
       </div>
       <div class="form-group">
-        <label>분류 (탭)</label>
+        <label>분류</label>
         <select id="form-category">
           <option value="월세">월세</option>
           <option value="공과금">공과금</option>
@@ -185,8 +172,12 @@
         <input type="number" id="form-amount" placeholder="예: 15000">
       </div>
       <div class="form-group">
-        <label>메모 (내용)</label>
+        <label>메모</label>
         <input type="text" id="form-title" placeholder="예: 도시가스 요금">
+      </div>
+      <div class="form-group">
+        <label>영수증 사진 (선택)</label>
+        <input type="file" id="form-photo" accept="image/*">
       </div>
       <div class="form-group">
         <button class="submit-btn" onclick="submitExpense()">추가하기</button>
@@ -197,13 +188,6 @@
   <div class="list-section">
     <h3>📋 이번 달 지출 목록</h3>
     <div id="expense-list-container"></div>
-  </div>
-
-  <div class="gmail-section">
-    <h3>📧 Gmail 공과금 자동 불러오기</h3>
-    <p style="font-size: 0.9rem; color: var(--text-light);">Google 계정을 연결하면 공과금 메일을 자동으로 읽어옵니다.</p>
-    <button class="gmail-btn">G Google 계정 연결</button>
-    <div class="info-box">⚠️ 한전 등 링크로만 청구서를 제공하는 곳은 수동으로 달력 날짜를 눌러 입력해주세요.</div>
   </div>
 </div>
 
@@ -223,8 +207,6 @@
     renderCalendar();
     renderExpenseList();
     updateSummary();
-    
-    // 폼 날짜 기본값을 오늘 날짜로 세팅
     let todayIso = new Date().toISOString().substring(0, 10);
     document.getElementById('form-date').value = todayIso;
   }
@@ -232,7 +214,6 @@
   function editBudget(storageKey, titleName) {
     let currentVal = budgets[storageKey];
     let newVal = prompt(`새로운 ${titleName} 금액을 숫자로만 입력해주세요:`, currentVal);
-    
     if (newVal !== null && !isNaN(newVal) && newVal !== "") {
       budgets[storageKey] = parseInt(newVal, 10);
       localStorage.setItem(storageKey, budgets[storageKey]);
@@ -243,7 +224,6 @@
   function updateSummary() {
     let currentYear = currentDate.getFullYear();
     let currentMonth = currentDate.getMonth();
-    
     let utilityActual = 0, foodActual = 0, suppliesActual = 0;
     let totalVariable = 0, completedTotal = 0;
     
@@ -251,7 +231,6 @@
       let expDate = new Date(exp.date);
       if (expDate.getFullYear() === currentYear && expDate.getMonth() === currentMonth) {
         let amt = parseInt(exp.amount, 10);
-        
         if (exp.category === '공과금') utilityActual += amt;
         if (exp.category === '식비') foodActual += amt;
         if (exp.category === '소모품') suppliesActual += amt;
@@ -307,7 +286,6 @@
         chipsHTML += `<div class="expense-chip ${chipClass}" style="${style}">${(exp.amount/10000).toFixed(1)}만 ${exp.title}</div>`;
       });
       
-      // 달력 날짜 클릭 시 팝업 대신 하단 폼에 날짜를 자동으로 채워주는 함수 호출
       daysHTML += `<div class="day-cell ${isToday}" onclick="selectDateFromCalendar('${currentDateStr}')"><div class="day-number">${i}</div>${chipsHTML}</div>`;
     }
     
@@ -338,10 +316,15 @@
     monthlyExpenses.forEach(exp => {
       let checked = exp.completed ? 'checked' : '';
       let textStyle = exp.completed ? 'text-decoration: line-through; color: #ccc;' : '';
+      
+      // 사진이 있으면 표시
+      let photoHtml = exp.photo ? `<img src="${exp.photo}" class="expense-photo" onclick="window.open('${exp.photo}')">` : '';
+
       html += `
         <div class="expense-item">
           <div class="expense-info">
             <input type="checkbox" ${checked} onchange="toggleComplete(${exp.id})">
+            ${photoHtml}
             <span style="${textStyle}">[${exp.date.slice(5)}] ${exp.category} - ${exp.title}</span>
           </div>
           <div class="expense-amount-wrap">
@@ -376,46 +359,91 @@
     init();
   }
 
-  // 달력 클릭 시 폼 날짜 자동 입력
   function selectDateFromCalendar(dateStr) {
     document.getElementById('form-date').value = dateStr;
-    // 부드럽게 폼 위치로 스크롤 이동
     document.getElementById('expense-input-form').scrollIntoView({ behavior: 'smooth' });
-    // 제목(메모) 칸에 자동으로 커서 깜빡이게 하기
     document.getElementById('form-title').focus();
   }
 
-  // 하단 폼에서 데이터 제출
+  // 데이터 저장 및 압축 로직
   function submitExpense() {
     let dateStr = document.getElementById('form-date').value;
     let category = document.getElementById('form-category').value;
     let amountStr = document.getElementById('form-amount').value;
     let title = document.getElementById('form-title').value;
+    let photoInput = document.getElementById('form-photo');
 
     let amount = parseInt(amountStr, 10);
 
-    // 유효성 검사 (빈칸 방지)
     if (!dateStr || isNaN(amount) || !title) {
       alert("날짜, 금액, 메모를 모두 올바르게 입력해주세요.");
       return;
     }
 
-    expenses.push({ 
-      id: Date.now(), 
-      date: dateStr, 
-      title: title, 
-      amount: amount, 
-      category: category, 
-      completed: false 
-    });
-    
-    localStorage.setItem('budget_expenses', JSON.stringify(expenses));
-    
-    // 입력 성공 후 폼 초기화
-    document.getElementById('form-amount').value = '';
-    document.getElementById('form-title').value = '';
-    
-    init();
+    let btn = document.querySelector('.submit-btn');
+    btn.innerText = "저장 중...";
+    btn.disabled = true;
+
+    // 사진이 있는 경우 압축 진행
+    if (photoInput.files && photoInput.files[0]) {
+      let file = photoInput.files[0];
+      let reader = new FileReader();
+      
+      reader.onload = function(e) {
+        let img = new Image();
+        img.onload = function() {
+          let canvas = document.createElement('canvas');
+          let ctx = canvas.getContext('2d');
+          
+          // 압축: 가로 폭을 200px로 제한
+          let maxWidth = 200;
+          let scale = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scale;
+          
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          // 화질 50%로 JPEG 변환
+          let compressedPhotoUrl = canvas.toDataURL('image/jpeg', 0.5);
+          
+          saveData(dateStr, category, amount, title, compressedPhotoUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // 사진이 없는 경우 바로 저장
+      saveData(dateStr, category, amount, title, null);
+    }
+  }
+
+  function saveData(dateStr, category, amount, title, photoUrl) {
+    try {
+      expenses.push({ 
+        id: Date.now(), 
+        date: dateStr, 
+        title: title, 
+        amount: amount, 
+        category: category, 
+        photo: photoUrl,
+        completed: false 
+      });
+      
+      localStorage.setItem('budget_expenses', JSON.stringify(expenses));
+      
+      // 폼 초기화
+      document.getElementById('form-amount').value = '';
+      document.getElementById('form-title').value = '';
+      document.getElementById('form-photo').value = '';
+      
+    } catch (e) {
+      alert("용량 초과! 사진이 너무 많거나 큽니다. 불필요한 사진을 삭제해주세요.");
+    } finally {
+      let btn = document.querySelector('.submit-btn');
+      btn.innerText = "추가하기";
+      btn.disabled = false;
+      init();
+    }
   }
 
   init();
