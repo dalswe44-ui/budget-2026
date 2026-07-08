@@ -66,8 +66,8 @@
     .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: #fdfbf7; border-bottom: 1px solid var(--border-color); text-align: center; padding: 10px 0; font-weight: bold; font-size: 0.9rem; color: var(--text-light); }
     .weekdays div:first-child { color: var(--primary-red); } .weekdays div:last-child { color: var(--primary-blue); }
     .days { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(100px, auto); }
-    .day-cell { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 8px; cursor: pointer; min-height: 100px; }
-    .day-cell:nth-child(7n) { border-right: none; } .day-cell:hover { background-color: #f9f9f9; }
+    .day-cell { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 8px; cursor: pointer; min-height: 100px; transition: background-color 0.2s; }
+    .day-cell:nth-child(7n) { border-right: none; } .day-cell:hover { background-color: #e8f4f8; }
     .day-number { font-size: 0.9rem; margin-bottom: 5px; }
     .day-cell:nth-child(7n+1) .day-number { color: var(--primary-red); } .day-cell:nth-child(7n) .day-number { color: var(--primary-blue); }
     .other-month { color: #ccc !important; }
@@ -77,10 +77,20 @@
     .chip-utility { background-color: #ebf5fb; color: var(--primary-blue); border-left: 3px solid var(--primary-blue); }
     .chip-default { background-color: #f4f6f7; color: var(--text-main); border-left: 3px solid #ccc; }
 
-    /* 지출 목록 & Gmail 섹션 (위아래 전체 너비 구조로 복구) */
-    .list-section, .gmail-section { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    .list-section h3, .gmail-section h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    /* 하단 입력 폼, 리스트, Gmail 섹션 */
+    .input-section, .list-section, .gmail-section { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .input-section h3, .list-section h3, .gmail-section h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
     
+    /* 폼 그리드 (아이패드 반응형) */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.85rem; font-weight: bold; color: var(--text-main); }
+    .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
+    
+    .submit-btn { background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background 0.2s; }
+    .submit-btn:hover { background: #2980b9; }
+
     .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
     .expense-item:last-child { border-bottom: none; }
     .expense-info { display: flex; align-items: center; gap: 10px; }
@@ -152,6 +162,38 @@
     <div class="days" id="calendar-days"></div>
   </div>
 
+  <div class="input-section" id="expense-input-form">
+    <h3>✍️ 지출 추가하기</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>날짜</label>
+        <input type="date" id="form-date">
+      </div>
+      <div class="form-group">
+        <label>분류 (탭)</label>
+        <select id="form-category">
+          <option value="월세">월세</option>
+          <option value="공과금">공과금</option>
+          <option value="식비">식비</option>
+          <option value="소모품">소모품</option>
+          <option value="이사관련">이사관련</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>금액</label>
+        <input type="number" id="form-amount" placeholder="예: 15000">
+      </div>
+      <div class="form-group">
+        <label>메모 (내용)</label>
+        <input type="text" id="form-title" placeholder="예: 도시가스 요금">
+      </div>
+      <div class="form-group">
+        <button class="submit-btn" onclick="submitExpense()">추가하기</button>
+      </div>
+    </div>
+  </div>
+
   <div class="list-section">
     <h3>📋 이번 달 지출 목록</h3>
     <div id="expense-list-container"></div>
@@ -169,7 +211,6 @@
   let currentDate = new Date(2026, 6, 1); 
   let expenses = JSON.parse(localStorage.getItem('budget_expenses')) || [];
   
-  // 기본 예산 데이터 구조화
   let budgets = {
     budget_income: localStorage.getItem('budget_income') || 1500000,
     budget_rent: localStorage.getItem('budget_rent') || 660000,
@@ -182,9 +223,12 @@
     renderCalendar();
     renderExpenseList();
     updateSummary();
+    
+    // 폼 날짜 기본값을 오늘 날짜로 세팅
+    let todayIso = new Date().toISOString().substring(0, 10);
+    document.getElementById('form-date').value = todayIso;
   }
 
-  // 통합 예산 수정 함수
   function editBudget(storageKey, titleName) {
     let currentVal = budgets[storageKey];
     let newVal = prompt(`새로운 ${titleName} 금액을 숫자로만 입력해주세요:`, currentVal);
@@ -200,11 +244,8 @@
     let currentYear = currentDate.getFullYear();
     let currentMonth = currentDate.getMonth();
     
-    let utilityActual = 0;
-    let foodActual = 0;
-    let suppliesActual = 0;
-    let totalVariable = 0;
-    let completedTotal = 0;
+    let utilityActual = 0, foodActual = 0, suppliesActual = 0;
+    let totalVariable = 0, completedTotal = 0;
     
     expenses.forEach(exp => {
       let expDate = new Date(exp.date);
@@ -215,7 +256,6 @@
         if (exp.category === '식비') foodActual += amt;
         if (exp.category === '소모품') suppliesActual += amt;
         
-        // 월세 제외한 이번 달 변동 지출 총합
         if (exp.category !== '월세') {
           totalVariable += amt;
           if(exp.completed) completedTotal += amt;
@@ -223,19 +263,14 @@
       }
     });
 
-    // 상단 카드 텍스트 업데이트
     document.getElementById('income-display').innerText = parseInt(budgets.budget_income).toLocaleString() + '원';
     document.getElementById('rent-display').innerText = parseInt(budgets.budget_rent).toLocaleString() + '원';
-    
     document.getElementById('utility-actual-display').innerText = utilityActual.toLocaleString() + '원';
     document.getElementById('utility-budget-display').innerText = '예산: ' + parseInt(budgets.budget_utility_target).toLocaleString() + '원';
-    
     document.getElementById('food-actual-display').innerText = foodActual.toLocaleString() + '원';
     document.getElementById('food-budget-display').innerText = '예산: ' + parseInt(budgets.budget_food_target).toLocaleString() + '원';
-    
     document.getElementById('supplies-actual-display').innerText = suppliesActual.toLocaleString() + '원';
     document.getElementById('supplies-budget-display').innerText = '예산: ' + parseInt(budgets.budget_supplies_target).toLocaleString() + '원';
-
     document.getElementById('total-display').innerText = totalVariable.toLocaleString() + '원';
     document.getElementById('completed-display').innerText = '완료 ' + completedTotal.toLocaleString() + '원';
     
@@ -272,7 +307,8 @@
         chipsHTML += `<div class="expense-chip ${chipClass}" style="${style}">${(exp.amount/10000).toFixed(1)}만 ${exp.title}</div>`;
       });
       
-      daysHTML += `<div class="day-cell ${isToday}" onclick="addExpensePrompt('${currentDateStr}')"><div class="day-number">${i}</div>${chipsHTML}</div>`;
+      // 달력 날짜 클릭 시 팝업 대신 하단 폼에 날짜를 자동으로 채워주는 함수 호출
+      daysHTML += `<div class="day-cell ${isToday}" onclick="selectDateFromCalendar('${currentDateStr}')"><div class="day-number">${i}</div>${chipsHTML}</div>`;
     }
     
     const totalCells = firstDayIndex + lastDay;
@@ -323,9 +359,7 @@
     if(exp) {
       exp.completed = !exp.completed;
       localStorage.setItem('budget_expenses', JSON.stringify(expenses));
-      renderCalendar();
-      renderExpenseList();
-      updateSummary();
+      init();
     }
   }
 
@@ -333,9 +367,7 @@
     if(confirm("이 지출 내역을 삭제하시겠습니까?")) {
       expenses = expenses.filter(e => e.id !== id);
       localStorage.setItem('budget_expenses', JSON.stringify(expenses));
-      renderCalendar();
-      renderExpenseList();
-      updateSummary();
+      init();
     }
   }
 
@@ -344,17 +376,45 @@
     init();
   }
 
-  function addExpensePrompt(dateStr) {
-    let title = prompt(`${dateStr}의 지출 내용을 입력하세요:\n(예: 도시가스)`);
-    if (!title) return;
-    let amountStr = prompt(`금액을 숫자로만 입력하세요:`);
-    let amount = parseInt(amountStr, 10);
-    if (isNaN(amount)) return;
-    let category = prompt(`카테고리를 입력하세요:\n(월세, 공과금, 식비, 소모품, 이사관련, 기타 중 택1)`);
-    if (!category) category = '기타';
+  // 달력 클릭 시 폼 날짜 자동 입력
+  function selectDateFromCalendar(dateStr) {
+    document.getElementById('form-date').value = dateStr;
+    // 부드럽게 폼 위치로 스크롤 이동
+    document.getElementById('expense-input-form').scrollIntoView({ behavior: 'smooth' });
+    // 제목(메모) 칸에 자동으로 커서 깜빡이게 하기
+    document.getElementById('form-title').focus();
+  }
 
-    expenses.push({ id: Date.now(), date: dateStr, title: title, amount: amount, category: category, completed: false });
+  // 하단 폼에서 데이터 제출
+  function submitExpense() {
+    let dateStr = document.getElementById('form-date').value;
+    let category = document.getElementById('form-category').value;
+    let amountStr = document.getElementById('form-amount').value;
+    let title = document.getElementById('form-title').value;
+
+    let amount = parseInt(amountStr, 10);
+
+    // 유효성 검사 (빈칸 방지)
+    if (!dateStr || isNaN(amount) || !title) {
+      alert("날짜, 금액, 메모를 모두 올바르게 입력해주세요.");
+      return;
+    }
+
+    expenses.push({ 
+      id: Date.now(), 
+      date: dateStr, 
+      title: title, 
+      amount: amount, 
+      category: category, 
+      completed: false 
+    });
+    
     localStorage.setItem('budget_expenses', JSON.stringify(expenses));
+    
+    // 입력 성공 후 폼 초기화
+    document.getElementById('form-amount').value = '';
+    document.getElementById('form-title').value = '';
+    
     init();
   }
 
