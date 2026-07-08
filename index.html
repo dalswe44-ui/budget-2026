@@ -71,4 +71,294 @@
     .day-number { font-size: 0.9rem; margin-bottom: 5px; }
     .day-cell:nth-child(7n+1) .day-number { color: var(--primary-red); } .day-cell:nth-child(7n) .day-number { color: var(--primary-blue); }
     .other-month { color: #ccc !important; }
-    .today .day-number { background: var(--text-main); color: white !important; border-radius: 50%; width: 24px; height: 24px; display
+    .today .day-number { background: var(--text-main); color: white !important; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; }
+
+    .expense-chip { font-size: 0.75rem; padding: 4px 6px; border-radius: 4px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chip-utility { background-color: #ebf5fb; color: var(--primary-blue); border-left: 3px solid var(--primary-blue); }
+    .chip-default { background-color: #f4f6f7; color: var(--text-main); border-left: 3px solid #ccc; }
+
+    /* 지출 목록 & Gmail 섹션 (위아래 전체 너비 구조로 복구) */
+    .list-section, .gmail-section { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .list-section h3, .gmail-section h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    
+    .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .expense-item:last-child { border-bottom: none; }
+    .expense-info { display: flex; align-items: center; gap: 10px; }
+    .expense-amount-wrap { display: flex; align-items: center; gap: 15px; }
+    .delete-btn { background: none; border: none; color: var(--primary-red); cursor: pointer; font-size: 1.1rem; padding: 0 5px; }
+    
+    .gmail-btn { background: white; border: 1px solid #ccc; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+    .info-box { background: #ebf5fb; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; color: #2980b9; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="card-title">세후 월급 <span class="edit-btn" onclick="editBudget('budget_income', '세후 월급')">✏️</span></div>
+      <div class="card-amount text-green" id="income-display">1,500,000원</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-title">월세 <span class="edit-btn" onclick="editBudget('budget_rent', '월세')">✏️</span></div>
+      <div class="card-amount text-orange" id="rent-display">660,000원</div>
+      <div class="card-desc">매월 14일</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-title">공과금 <span class="edit-btn" onclick="editBudget('budget_utility_target', '공과금 예산')">✏️</span></div>
+      <div class="card-amount text-blue" id="utility-actual-display">0원</div>
+      <div class="card-desc" id="utility-budget-display">예산: 150,000원</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-title">식비 <span class="edit-btn" onclick="editBudget('budget_food_target', '식비 예산')">✏️</span></div>
+      <div class="card-amount text-yellow" id="food-actual-display">0원</div>
+      <div class="card-desc" id="food-budget-display">예산: 500,000원</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-title">소모품 <span class="edit-btn" onclick="editBudget('budget_supplies_target', '소모품 예산')">✏️</span></div>
+      <div class="card-amount text-purple" id="supplies-actual-display">0원</div>
+      <div class="card-desc" id="supplies-budget-display">예산: 190,000원</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-title">이번 달 합계</div>
+      <div class="card-amount text-red" id="total-display">0원</div>
+      <div class="card-desc" id="completed-display">완료 0원</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-title">잔액 예상</div>
+      <div class="card-amount text-green" id="balance-display">0원</div>
+    </div>
+  </div>
+
+  <div class="calendar-header">
+    <button class="btn-nav" onclick="changeMonth(-1)">◀ 이전</button>
+    <h2 id="month-year-display">2026년 7월</h2>
+    <button class="btn-nav" onclick="changeMonth(1)">다음 ▶</button>
+  </div>
+
+  <div class="category-legend">
+    <div class="legend-item"><div class="legend-color cat-rent"></div> 월세</div>
+    <div class="legend-item"><div class="legend-color cat-utility"></div> 공과금</div>
+    <div class="legend-item"><div class="legend-color cat-food"></div> 식비</div>
+    <div class="legend-item"><div class="legend-color cat-supplies"></div> 소모품</div>
+    <div class="legend-item"><div class="legend-color cat-move"></div> 이사관련</div>
+    <div class="legend-item"><div class="legend-color cat-etc"></div> 기타</div>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="weekdays">
+      <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+    </div>
+    <div class="days" id="calendar-days"></div>
+  </div>
+
+  <div class="list-section">
+    <h3>📋 이번 달 지출 목록</h3>
+    <div id="expense-list-container"></div>
+  </div>
+
+  <div class="gmail-section">
+    <h3>📧 Gmail 공과금 자동 불러오기</h3>
+    <p style="font-size: 0.9rem; color: var(--text-light);">Google 계정을 연결하면 공과금 메일을 자동으로 읽어옵니다.</p>
+    <button class="gmail-btn">G Google 계정 연결</button>
+    <div class="info-box">⚠️ 한전 등 링크로만 청구서를 제공하는 곳은 수동으로 달력 날짜를 눌러 입력해주세요.</div>
+  </div>
+</div>
+
+<script>
+  let currentDate = new Date(2026, 6, 1); 
+  let expenses = JSON.parse(localStorage.getItem('budget_expenses')) || [];
+  
+  // 기본 예산 데이터 구조화
+  let budgets = {
+    budget_income: localStorage.getItem('budget_income') || 1500000,
+    budget_rent: localStorage.getItem('budget_rent') || 660000,
+    budget_utility_target: localStorage.getItem('budget_utility_target') || 150000,
+    budget_food_target: localStorage.getItem('budget_food_target') || 500000,
+    budget_supplies_target: localStorage.getItem('budget_supplies_target') || 190000
+  };
+
+  function init() {
+    renderCalendar();
+    renderExpenseList();
+    updateSummary();
+  }
+
+  // 통합 예산 수정 함수
+  function editBudget(storageKey, titleName) {
+    let currentVal = budgets[storageKey];
+    let newVal = prompt(`새로운 ${titleName} 금액을 숫자로만 입력해주세요:`, currentVal);
+    
+    if (newVal !== null && !isNaN(newVal) && newVal !== "") {
+      budgets[storageKey] = parseInt(newVal, 10);
+      localStorage.setItem(storageKey, budgets[storageKey]);
+      updateSummary();
+    }
+  }
+
+  function updateSummary() {
+    let currentYear = currentDate.getFullYear();
+    let currentMonth = currentDate.getMonth();
+    
+    let utilityActual = 0;
+    let foodActual = 0;
+    let suppliesActual = 0;
+    let totalVariable = 0;
+    let completedTotal = 0;
+    
+    expenses.forEach(exp => {
+      let expDate = new Date(exp.date);
+      if (expDate.getFullYear() === currentYear && expDate.getMonth() === currentMonth) {
+        let amt = parseInt(exp.amount, 10);
+        
+        if (exp.category === '공과금') utilityActual += amt;
+        if (exp.category === '식비') foodActual += amt;
+        if (exp.category === '소모품') suppliesActual += amt;
+        
+        // 월세 제외한 이번 달 변동 지출 총합
+        if (exp.category !== '월세') {
+          totalVariable += amt;
+          if(exp.completed) completedTotal += amt;
+        }
+      }
+    });
+
+    // 상단 카드 텍스트 업데이트
+    document.getElementById('income-display').innerText = parseInt(budgets.budget_income).toLocaleString() + '원';
+    document.getElementById('rent-display').innerText = parseInt(budgets.budget_rent).toLocaleString() + '원';
+    
+    document.getElementById('utility-actual-display').innerText = utilityActual.toLocaleString() + '원';
+    document.getElementById('utility-budget-display').innerText = '예산: ' + parseInt(budgets.budget_utility_target).toLocaleString() + '원';
+    
+    document.getElementById('food-actual-display').innerText = foodActual.toLocaleString() + '원';
+    document.getElementById('food-budget-display').innerText = '예산: ' + parseInt(budgets.budget_food_target).toLocaleString() + '원';
+    
+    document.getElementById('supplies-actual-display').innerText = suppliesActual.toLocaleString() + '원';
+    document.getElementById('supplies-budget-display').innerText = '예산: ' + parseInt(budgets.budget_supplies_target).toLocaleString() + '원';
+
+    document.getElementById('total-display').innerText = totalVariable.toLocaleString() + '원';
+    document.getElementById('completed-display').innerText = '완료 ' + completedTotal.toLocaleString() + '원';
+    
+    let expectedBalance = budgets.budget_income - budgets.budget_rent - totalVariable;
+    document.getElementById('balance-display').innerText = expectedBalance.toLocaleString() + '원';
+  }
+
+  function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    document.getElementById('month-year-display').innerText = `${year}년 ${month + 1}월`;
+    
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const prevLastDay = new Date(year, month, 0).getDate();
+    const daysContainer = document.getElementById('calendar-days');
+    daysContainer.innerHTML = "";
+    
+    let daysHTML = "";
+    for (let x = firstDayIndex; x > 0; x--) {
+      daysHTML += `<div class="day-cell"><div class="day-number other-month">${prevLastDay - x + 1}</div></div>`;
+    }
+    
+    let today = new Date();
+    for (let i = 1; i <= lastDay; i++) {
+      let isToday = (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) ? "today" : "";
+      let currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      let dayExpenses = expenses.filter(exp => exp.date === currentDateStr);
+      let chipsHTML = "";
+      
+      dayExpenses.forEach(exp => {
+        let chipClass = exp.category === '공과금' ? 'chip-utility' : 'chip-default';
+        let style = exp.completed ? "text-decoration: line-through; opacity: 0.5;" : "";
+        chipsHTML += `<div class="expense-chip ${chipClass}" style="${style}">${(exp.amount/10000).toFixed(1)}만 ${exp.title}</div>`;
+      });
+      
+      daysHTML += `<div class="day-cell ${isToday}" onclick="addExpensePrompt('${currentDateStr}')"><div class="day-number">${i}</div>${chipsHTML}</div>`;
+    }
+    
+    const totalCells = firstDayIndex + lastDay;
+    const nextDays = Math.ceil(totalCells / 7) * 7 - totalCells;
+    for (let j = 1; j <= nextDays; j++) {
+      daysHTML += `<div class="day-cell"><div class="day-number other-month">${j}</div></div>`;
+    }
+    daysContainer.innerHTML = daysHTML;
+  }
+
+  function renderExpenseList() {
+    const container = document.getElementById('expense-list-container');
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    
+    let monthlyExpenses = expenses.filter(exp => {
+      let d = new Date(exp.date);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+    }).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    if(monthlyExpenses.length === 0) {
+      container.innerHTML = '<p style="color: #999; font-size: 0.9rem; text-align: center; padding: 20px 0;">지출 내역이 없습니다.</p>';
+      return;
+    }
+
+    let html = '';
+    monthlyExpenses.forEach(exp => {
+      let checked = exp.completed ? 'checked' : '';
+      let textStyle = exp.completed ? 'text-decoration: line-through; color: #ccc;' : '';
+      html += `
+        <div class="expense-item">
+          <div class="expense-info">
+            <input type="checkbox" ${checked} onchange="toggleComplete(${exp.id})">
+            <span style="${textStyle}">[${exp.date.slice(5)}] ${exp.category} - ${exp.title}</span>
+          </div>
+          <div class="expense-amount-wrap">
+            <strong style="${textStyle}">${parseInt(exp.amount).toLocaleString()}원</strong>
+            <button class="delete-btn" onclick="deleteExpense(${exp.id})">✕</button>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  function toggleComplete(id) {
+    let exp = expenses.find(e => e.id === id);
+    if(exp) {
+      exp.completed = !exp.completed;
+      localStorage.setItem('budget_expenses', JSON.stringify(expenses));
+      renderCalendar();
+      renderExpenseList();
+      updateSummary();
+    }
+  }
+
+  function deleteExpense(id) {
+    if(confirm("이 지출 내역을 삭제하시겠습니까?")) {
+      expenses = expenses.filter(e => e.id !== id);
+      localStorage.setItem('budget_expenses', JSON.stringify(expenses));
+      renderCalendar();
+      renderExpenseList();
+      updateSummary();
+    }
+  }
+
+  function changeMonth(direction) {
+    currentDate.setMonth(currentDate.getMonth() + direction);
+    init();
+  }
+
+  function addExpensePrompt(dateStr) {
+    let title = prompt(`${dateStr}의 지출 내용을 입력하세요:\n(예: 도시가스)`);
+    if (!title) return;
+    let amountStr = prompt(`금액을 숫자로만 입력하세요:`);
+    let amount = parseInt(amountStr, 10);
+    if (isNaN(amount)) return;
+    let category = prompt(`카테고리를 입력하세요:\n(월세, 공과금, 식비, 소모품, 이사관련, 기타 중 택1)`);
+    if (!category) category = '기타';
+
+    expenses.push({ id: Date.now(), date: dateStr, title: title, amount: amount, category: category, completed: false });
+    localStorage.setItem('budget_expenses', JSON.stringify(expenses));
+    init();
+  }
+
+  init();
+</script>
+</body>
+</html>
